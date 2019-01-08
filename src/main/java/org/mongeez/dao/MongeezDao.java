@@ -138,7 +138,10 @@ public class MongeezDao {
     public void runScript(String code) {
         final BasicDBObject command = new BasicDBObject();
         command.put("eval", code);
-        db.runCommand(command);
+        Document result = db.runCommand(command);
+        if (result.getDouble("ok") == 0) {
+            throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + result.getString("errmsg"));
+        }
     }
 
     public void logChangeSet(ChangeSet changeSet) {
