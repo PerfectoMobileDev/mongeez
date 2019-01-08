@@ -141,6 +141,11 @@ public class MongeezDao {
         Document result = db.runCommand(command);
         if (result.getDouble("ok") == 0) {
             throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + result.getString("errmsg"));
+        } else if (result.containsKey("retval")) {
+            @SuppressWarnings("SpellCheckingInspection") Document retval = (Document) result.get("retval");
+            if (retval.getDouble("ok") == 0) {
+                throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + result.getString("errmsg"));
+            }
         }
     }
 
