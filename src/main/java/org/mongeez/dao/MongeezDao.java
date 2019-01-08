@@ -19,13 +19,18 @@ import com.mongodb.client.model.Filters;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.mongeez.Mongeez;
 import org.mongeez.MongoAuth;
 import org.mongeez.commands.ChangeSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MongeezDao {
+    private final static Logger logger = LoggerFactory.getLogger(MongeezDao.class);
+
     private MongoDatabase db;
     private List<ChangeSetAttribute> changeSetAttributes;
 
@@ -144,9 +149,10 @@ public class MongeezDao {
         } else if (result.containsKey("retval")) {
             @SuppressWarnings("SpellCheckingInspection") Document retval = (Document) result.get("retval");
             if (retval.getDouble("ok") == 0) {
-                throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + result.getString("errmsg"));
+                throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + retval.getString("errmsg"));
             }
         }
+        logger.info("Script '" + code + "' executed successfully with result: " + result);
     }
 
     public void logChangeSet(ChangeSet changeSet) {
