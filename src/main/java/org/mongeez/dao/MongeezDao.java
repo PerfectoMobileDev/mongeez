@@ -144,15 +144,15 @@ public class MongeezDao {
         final BasicDBObject command = new BasicDBObject();
         command.put("eval", code);
         Document result = db.runCommand(command);
-        if (result.getDouble("ok") == 0) {
-            throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + result.getString("errmsg"));
+        if (result.containsKey("ok") && result.getDouble("ok") == 0) {
+            throw new RuntimeException("Failed executing mongodb script with error: " + result.getString("errmsg"));
         } else if (result.containsKey("retval")) {
             @SuppressWarnings("SpellCheckingInspection") Document retval = (Document) result.get("retval");
-            if (retval.getDouble("ok") == 0) {
-                throw new RuntimeException("Failed executing mongodb script '" + code + "' with error: " + retval.getString("errmsg"));
+            if (retval.containsKey("ok") && retval.getDouble("ok") == 0) {
+                throw new RuntimeException("Failed executing mongodb script with error: " + retval.getString("errmsg"));
             }
         }
-        logger.info("Script '" + code + "' executed successfully with result: " + result);
+        logger.info("Script executed successfully with result: " + result);
     }
 
     public void logChangeSet(ChangeSet changeSet) {
