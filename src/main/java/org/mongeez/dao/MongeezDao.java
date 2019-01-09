@@ -19,7 +19,6 @@ import com.mongodb.client.model.Filters;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.mongeez.Mongeez;
 import org.mongeez.MongoAuth;
 import org.mongeez.commands.ChangeSet;
 import org.slf4j.Logger;
@@ -144,15 +143,20 @@ public class MongeezDao {
         final BasicDBObject command = new BasicDBObject();
         command.put("eval", code);
         Document result = db.runCommand(command);
-        if (result.containsKey("ok") && result.getDouble("ok") == 0) {
-            throw new RuntimeException("Failed executing mongodb script with error: " + result.getString("errmsg"));
-        } else if (result.containsKey("retval")) {
+
+        handleError(result);
+        if (result.containsKey("retval")) {
             @SuppressWarnings("SpellCheckingInspection") Document retval = (Document) result.get("retval");
-            if (retval.containsKey("ok") && retval.getDouble("ok") == 0) {
-                throw new RuntimeException("Failed executing mongodb script with error: " + retval.getString("errmsg"));
-            }
+            handleError(retval);
         }
+
         logger.info("Script executed successfully with result: " + result);
+    }
+
+    private void handleError(Document doc) {
+        if (doc.containsKey("ok") && doc.getDouble("ok") == 0) {
+            throw new RuntimeException("Failed executing mongodb script with error: " + doc.getString("errmsg"));
+        }
     }
 
     public void logChangeSet(ChangeSet changeSet) {
